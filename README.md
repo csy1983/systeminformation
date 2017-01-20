@@ -42,20 +42,23 @@ si.cpu()
 
 ### Latest Activity
 
-- Version 3.13.0: added shell (returns standard shell)
-- Version 3.12.0: refactoring and extended currentLoad (better OSX coverage and added irq load).
-- Version 3.11.0: blockDevices now also for OSX and also extended (+ label, model, serial, protocol).
-- Version 3.10.0: added blockDevices (list of disks, partitions, raids and roms).
-- Version 3.9.0: extended networkInterfaces (added MAC address).
-- Version 3.8.0: added dockerContainerProcesses (array of processes inside a docker container).
-- Version 3.7.0: extended docker stats.
-- Version 3.6.0: added versions (kernel, ssl, node, npm, pm2, ...).
-- Version 3.5.0: added graphics info (controller and display).
-- Version 3.4.0: rewritten currentLoad and CPU load for processes (linux). This is now much more accurate.
-- Version 3.3.0: added process list. Get full process list including details like cpu and mem usage, status, command, ...
-- Version 3.2.0: added battery support. If a battery is installed, you get information about status and current capacity level
+- Version 3.16.0: `blockDevices`: added removable attribute
+- Version 3.15.0: added `cpuTemperature` also for OSX 
+- Version 3.14.0: added `currentLoad` per cpu/core, cpu cache (L1, L2, L3) and cpu flags 
+- Version 3.13.0: added `shell` (returns standard shell)
+- Version 3.12.0: refactoring and extended `currentLoad` (better OSX coverage and added irq load).
+- Version 3.11.0: `blockDevices` now also for OSX and also extended (+ label, model, serial, protocol).
+- Version 3.10.0: added `blockDevices` (list of disks, partitions, raids and roms).
+- Version 3.9.0: extended `networkInterfaces` (added MAC address).
+- Version 3.8.0: added `dockerContainerProcesses` (array of processes inside a docker container).
+- Version 3.7.0: extended `dockerContainerStats`.
+- Version 3.6.0: added `versions` (kernel, ssl, node, npm, pm2, ...).
+- Version 3.5.0: added `graphics` info (controller and display).
+- Version 3.4.0: rewritten `currentLoad` and CPU load for processes (linux). This is now much more accurate.
+- Version 3.3.0: added `processes.list`. Get full process list including details like cpu and mem usage, status, command, ...
+- Version 3.2.0: added `battery` support. If a battery is installed, you get information about status and current capacity level
 - Version 3.1.0: added [Docker][docker-url] support. Now you can scan your docker containers and get their stats
-- Version 3.0.0: added DisksIO - overall diskIO and IOPS values for all mounted volumes
+- Version 3.0.0: added `disksIO` - overall diskIO and IOPS values for all mounted volumes
 
 ### Changelog
 
@@ -124,14 +127,20 @@ This library is splitted in several sections:
 | - brand | X | X | e.g. 'Core(TM)2 Duo' |
 | - speed | X | X | in GHz e.g. '3.40' |
 | - cores | X | X | # cores |
+| si.cpuFlags(cb) | X | X | CPU flags|
+| si.cpuCache(cb) | X | X | CPU cache sizes |
+| - l1d | X | X | L1D size |
+| - l1i | X | X | L1I size |
+| - l2 | X | X | L2 size |
+| - l3 | X | X | L3 size |
 | si.cpuCurrentspeed(cb) | X | X | current CPU speed (in GHz)|
 | - avg | X | X | avg CPU speed (all cores) |
 | - min | X | X | min CPU speed (all cores) |
 | - max | X | X | max CPU speed (all cores) |
-| si.cpuTemperature(cb) | X | | CPU temperature (if sensors is installed) |
-| - main | X | | main temperature |
-| - cores | X | | array of temperatures |
-| - max | X | | max temperature |
+| si.cpuTemperature(cb) | X | X | CPU temperature (if sensors is installed) |
+| - main | X | X | main temperature |
+| - cores | X | X | array of temperatures |
+| - max | X | X | max temperature |
 | si.mem(cb) | X | X | Memory information|
 | - total | X | X | total memory |
 | - free | X | X | not used |
@@ -180,7 +189,8 @@ This library is splitted in several sections:
 | - [0].uuid | X | X | UUID |
 | - [0].label | X | X | label |
 | - [0].model | X | X | model |
-| - [0].serial | X |   | serial |
+| - [0].serial | X |  | serial |
+| - [0].removable | X | X | serial |
 | - [0].protocol | X | X | protocol (SATA, PCI-Express, ...) |
 | si.fsStats(cb) | X | X | current transfer stats |
 | - rx | X | X | bytes read since startup |
@@ -227,6 +237,7 @@ This library is splitted in several sections:
 | - currentload_nice | X | X | CPU-Load Nice in % |
 | - currentload_system | X | X | CPU-Load System in % |
 | - currentload_irq | X | X | CPU-Load System in % |
+| - cpus[] | X | X | current loads per CPU in % |
 | si.fullLoad(cb) | X | X | CPU-full load since bootup in % |
 | si.services('mysql, apache2', cb) | X | X | pass comma separated string of services |
 | - [0].name | X | X | name of service |
@@ -349,10 +360,6 @@ divided by the time between two calls of the function.
 
 ## Known Issues
 
-There is one major things, that I was still not able to solve:
-
-For OS X, I did not find a reliable way to get the CPU temperature. All suggestions I found did not work on current version of OS X on different machines (intel platform). So if anyone has an idea, this would be helpful.
-
 I am happy to discuss any comments and suggestions. Please feel free to contact me if you see any possibility of improvement!
 
 ## Comments
@@ -376,6 +383,12 @@ Written by Sebastian Hildebrandt [sebhildebrandt](https://github.com/sebhildebra
 - Riccardo Novaglia [richy24](https://github.com/richy24)
 - Quentin Busuttil [Buzut](https://github.com/Buzut)
 - lapsio [lapsio](https://github.com/lapsio)
+- csy [csy](https://github.com/csy1983)
+
+OSX Temperature: Credits here are going to:
+ 
+- Massimiliano Marcon [mmarcon](https://github.com/mmarcon) - for his work on [smc-code][smc-code-url]
+- Sébastien Lavoie[lavoiesl](https://github.com/lavoiesl) for his work on [osx-cpu-temp][osx-cpu-temp-url] code. 
 
 ## Copyright Information
 
@@ -389,7 +402,7 @@ All other trademarks are the property of their respective owners.
 
 >The [`MIT`][license-url] License (MIT)
 >
->Copyright &copy; 2014-2016 Sebastian Hildebrandt, [+innovations](http://www.plus-innovations.com).
+>Copyright &copy; 2014-2017 Sebastian Hildebrandt, [+innovations](http://www.plus-innovations.com).
 >
 >Permission is hereby granted, free of charge, to any person obtaining a copy
 >of this software and associated documentation files (the "Software"), to deal
@@ -433,3 +446,6 @@ All other trademarks are the property of their respective owners.
 
 [mmon-npm-url]: https://npmjs.org/package/mmon
 [mmon-github-url]: https://github.com/sebhildebrandt/mmon
+
+[smc-code-url]: https://github.com/mmarcon/node-smc
+[osx-cpu-temp-url]: https://github.com/lavoiesl/osx-cpu-temp
